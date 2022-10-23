@@ -71,7 +71,7 @@
 	Config::set('PHP_EXEC_CMD', "php", 'WT', FALSE, 'WT_PHP_EXEC_CMD');                                                                          //команда запуска php скрипта
 	Config::set('JS_EXEC_CMD', "node", 'WT', FALSE, 'WT_JS_EXEC_CMD');                                                                           //команда запуска js скрипта
 	//Внешний url
-	Config::set('DOMAIN_URL', "https://localhost", 'WT', FALSE, 'WT_DOMAIN_URL');
+	Config::set('DOMAIN_URL', "https://902d-95-165-168-64.eu.ngrok.io", 'WT', FALSE, 'WT_DOMAIN_URL');
 	Config::set('NODE_URL', Config::get('DOMAIN_URL') . '/node_modules' . '/', 'WT', FALSE, 'WT_NODE_URL');
 //	определяем подключение к своей базе
 	Config::set('HOST_DB', Config::get('CORE_PATH') . 'databases/database.db', 'WT', FALSE, 'WT_HOST_DB');
@@ -123,6 +123,10 @@
 
 	ConfigOverridable::set('DEV_SERVER', FALSE);
 	Config::set('DEV_SERVER_PORT', 8080);
+
+	Config::set('TOKEN', '5753481739:AAFSKQ6sDq8017z6KfLbCleQysIRwLmeHeE', 'telegram', FALSE, 'BOT_TOKEN');
+	Config::set('NAME', 'webtooltemplate_bot', 'telegram', FALSE, 'BOT_NAME');
+	Config::set('CACHE_PATH', WT_CORE_PATH . 'telegram_cache/', 'telegram', FALSE, 'BOT_CACHE_PATH');
 
 	//Создние всех путей
 	foreach (Config::$aliases as $key => $path) {

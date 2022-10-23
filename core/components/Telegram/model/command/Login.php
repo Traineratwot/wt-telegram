@@ -35,21 +35,21 @@
 			$core = Core::init();
 
 			if (empty($args[0])) {
-				$this->scope->sendMessage($id, 'введите почту');
+				$this->scope->sendMessage($id, _('enter email'));
 				return FALSE;
 			}
 			$u = $core->getUser(['email' => $args[0]]);
 			if (empty($args[1])) {
-				$this->scope->sendMessage($id, 'вы не ввели пароль');
+				$this->scope->sendMessage($id, _('enter password'));
 				return FALSE;
 			}
 			$password = $args[1];
 			if ($u->verifyPassword($password)) {
 				$u->set('telegram_chat_id', $id);
 				$u->save();
-				$this->scope->sendMessage($id, 'ok');
+				$this->scope->sendMessage($id, _('success'));
 			} else {
-				$this->scope->sendMessage($id, 'НЕ правильный пароль');
+				$this->scope->sendMessage($id, _('invalid password'));
 			}
 		}
 	}

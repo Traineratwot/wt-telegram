@@ -2,6 +2,7 @@
 
 	namespace components\Telegram;
 
+	use components\Telegram\classes\tables\Users;
 	use model\components\Manifest;
 
 	class Telegram extends Manifest
@@ -16,7 +17,15 @@
 		: array
 		{
 			return [
-				'telegram-bot/api'
+				'telegram-bot/api',
+			];
+		}
+
+		public static function getTables()
+		: array
+		{
+			return [
+				Users::class,
 			];
 		}
 	}

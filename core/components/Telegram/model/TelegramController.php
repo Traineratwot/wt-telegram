@@ -97,10 +97,9 @@
 			// если Телеграм-бот не зарегистрирован - регистрируем
 			try {
 				if (!Cache::getCache('lock', 'telegram', FALSE)) {
-					$page_url = WT_DOMAIN_URL . '/telegram-bot.php';
+					$page_url = WT_DOMAIN_URL . '/telegram';
 					$result   = $this->bot->setWebhook($page_url);
 					if ($result) {
-
 						Cache::setCache('lock', [
 							'time'   => time(),
 							'url'    => $page_url,
