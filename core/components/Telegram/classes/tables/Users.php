@@ -1,6 +1,9 @@
 <?php
+
 	namespace components\Telegram\classes\tables;
+
 	use model\components\ComponentTable;
+	use model\main\Core;
 	use Traineratwot\PDOExtended\tableInfo\PDOENewDbObject;
 
 	/**
@@ -9,13 +12,16 @@
 	 */
 	class Users extends ComponentTable
 	{
-		public $table = 'users';
+		public $table      = 'users';
 		public $primaryKey = 'id';
 
-		public function createTable()
+		public static function createTable()
 		: PDOENewDbObject|false
 		{
-			$this->core->db->table('users')->alter()->addCol('telegram_chat_id','BIGINT')->run();
-			return false;
+			$core = Core::init();
+			if (!$core->db->table('users')->scheme->columnExists('telegram_chat_id')) {
+				$core->db->table('users')->alter()->addCol('telegram_chat_id', 'INT')->run();
+			}
+			return FALSE;
 		}
 	}

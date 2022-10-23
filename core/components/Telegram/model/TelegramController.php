@@ -122,12 +122,31 @@
 			$this->help = [];
 			$com        = __DIR__ . '/command/';
 			$commands   = scandir($com);
+			$commands   = array_map(function ($command) use ($com) {
+				if (is_file($com . $command)) {
+					return $com . $command;
+				}
+				return NULL;
+			}, $commands);
+
+			$com2 = WT_CLASSES_PATH . 'telegram/command/';
+			if (file_exists($com2)) {
+				$commands2 = scandir($com2);
+				$commands2 = array_map(function ($command) use ($com2) {
+					if (is_file($com2 . $command)) {
+						return $com2 . $command;
+					}
+					return NULL;
+				}, $commands2);
+				$commands  = array_merge($commands2, $commands);
+			}
+			$commands = array_unique($commands);
 			sort($commands);
 			// Инициализация всех команд
-			foreach ($commands as $c) {
+			foreach ($commands as $command) {
 				try {
-					if (is_file($com . $c) && ltrim($c, '.') === $c) {
-						$cls = include $com . $c;
+					if ($command && is_file($command)) {
+						$cls = include $command;
 						if (class_exists($cls)) {
 							$this->CLASSES[$cls] = new $cls($this);
 							$this->help[]        = (string)$this->CLASSES[$cls]->getDescription();
@@ -335,6 +354,8 @@
 		/**
 		 * @param $id
 		 * @param $message
+		 * @throws Exception
+		 * @throws InvalidArgumentException
 		 */
 		public function error($id, $message)
 		{
@@ -362,7 +383,7 @@
 								$self->getChat($id);
 								$words   = explode(' ', $text);
 								$command = mb_strtolower(array_shift($words));
-								if (!empty($caption) and !empty($document)) {
+								if (!empty($caption) && $document !== NULL) {
 									$command = $caption;
 								}
 								//сохранение в историю
@@ -454,7 +475,7 @@
 		public function likeNo(string $txt = '')
 		{
 			$txt = mb_strtolower(trim($txt));
-			if (in_array($txt, $this->NO)) {
+			if (in_array($txt, $this->NO, TRUE)) {
 				return TRUE;
 			}
 			return FALSE;

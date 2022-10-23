@@ -40,6 +40,10 @@
 				$subscribes = $core->db->query("SELECT DISTINCT subscribe.*, subscribe_user.userID FROM  subscribe 
 LEFT JOIN subscribe_user ON subscribe.id = subscribe_user.subscribeID AND subscribe_user.userID = '{$UID}'")->fetchAll(PDO::FETCH_ASSOC);
 				$keyboard   = [];
+				if (!count($subscribes)) {
+					$this->scope->sendMessage($id, 'Список подписок пуст');
+					return TRUE;
+				}
 				foreach ($subscribes as $subscribe) {
 					if ((int)$subscribe['userID']) {
 						$keyboard[][0] = [

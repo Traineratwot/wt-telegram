@@ -2,6 +2,8 @@
 
 	namespace components\Telegram;
 
+	use components\Telegram\classes\tables\Subscribe;
+	use components\Telegram\classes\tables\SubscribeUser;
 	use components\Telegram\classes\tables\Users;
 	use model\components\Manifest;
 
@@ -26,6 +28,8 @@
 		{
 			return [
 				Users::class,
+				Subscribe::class,
+				SubscribeUser::class,
 			];
 		}
 	}
