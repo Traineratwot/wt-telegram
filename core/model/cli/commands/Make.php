@@ -1,6 +1,6 @@
 <?php
 
-	namespace model\cli;
+	namespace core\model\cli\commands;
 
 	use model\main\Core;
 	use model\main\Utilities;
@@ -71,7 +71,6 @@ PHP;
 			$n2   = [];
 			foreach ($n as $value) {
 				$n2[] = ucfirst(strtolower($value));
-				$n3[] = ucfirst(strtolower($value));
 			}
 
 			return ucfirst(implode('', $n2));
@@ -81,11 +80,16 @@ PHP;
 		: string
 		{
 			self::name2class($name, $class, $namespace);
+			$implement = "";
+			if (file_exists(WT_MODEL_PATH . 'Events/plugins/' . $class . '.php')) {
+				$implement = "implements \core\model\Events\plugins\\{$class}";
+			}
+
 			return <<<PHP
 <?php
 	namespace classes\plugins{$namespace};
 	use model\Events\Plugin;
-	class {$class} extends Plugin
+	class {$class} extends Plugin {$implement}
 	{
 		public function process(\$data)
 		{
@@ -191,7 +195,7 @@ PHP;
 			$namespace = '';
 			self::name2class($name, $class, $namespace);
 
-			$namespace = "core\cron\controllers\\".trim($namespace,'\\');
+			$namespace = "core\cron\controllers\\" . trim($namespace, '\\');
 			return <<<PHP
 <?php
 	namespace $namespace;

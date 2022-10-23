@@ -13,7 +13,13 @@
 #### Установка
 
 1. распаковать это в директорию
-2. запустить `run install.php`
+2. запустить `composer create-project traineratwot/web-tool-template {project-name}`
+3. `cd {project-name}`
+4. **!обязательно!** `composer update`
+5. Настроить подключение к базе данных в `core/config.php`
+6. `composer wt:Install`
+7. _необязательно_ `composer wt:composer-config-update` - поможет вашей IDE ориентироваться в константах
+8. _необязательно_ `wt DevServer` - запустит наблюдатель который бдует обновлять страницу в браузере при изменении фалов
 
 #### Instructions
 
@@ -32,6 +38,7 @@
 	- `core/classes/smarty/plugins` => Каталог с пользовательскими `Smarty` плагинами
 	- `core/classes/tables` => Каталог с классами расширяет BdObject для работы с таблицей БД. смотри  `wt make table`
 	- `core/classes/traits` => Каталог с полезными `traits`
+	- `core/components` => Каталог с компонентами
 
 - #### console tool
 
@@ -52,6 +59,13 @@
 	- `wt cron {path to controller}` - сгенерировать команду запуска для crontab eg: `wt cron "category/test.php"`
 	- `wt cron {path to controller} run` - попробовать запустить задание cron: `wt cron "category/test.php" run`
 
+  #in develop
+
+	- `components create {name}` - создает новый компонент
+	- `components package {name}` - упаковывает компонент в транспортный пакет
+	- `components install {name}` - устанавливает компонент из транспортного пакета
+	- `components make{Ajax|Table|Page} {name} ...` - аналогично `wt make...` только для компонента
+
 - #### Пользователь
 
 	- login: ~~admin@example.com~~
@@ -62,8 +76,8 @@
 1. Отредактируйте функцию `WT_LOCALE_SELECT_FUNCTION` в конфиге под свой способ определить язык пользователя
 2. Создать файл локали .po из исходного кода проекта eg: `wt lang ru`
 3. Отредактируйте файл .po в паке `locale`. Я использую poEdit для этого
-5. Готово
-6. Если не работает - отключите `gettext` в конфиге
+4. Готово
+5. Если не работает - отключите `gettext` в конфиге
 
 ## API
 
@@ -113,8 +127,20 @@ Console::foreground_colors //list text color
 Console::background_colors //list background color
 ```
 
+#### Config
+
+```php
+
+
+Config::get('key','?namespace') //return value;
+Config::set('key','value','?namespace') //set value;
+// тоже самое но с возможностью перезаписывать в процессе выполнения
+ConfigOverridable::set('OverridableKey','value','?namespace')
+ConfigOverridable::get('OverridableKey','?namespace')
+Config::get('OverridableKey','?namespace') //return value;
+```
 
 # FAQ
 
- - Композер выдает фатальную ошибку 
-   - if composer fatal error use 
+- Композер выдает фатальную ошибку?
+	- Это значит что у вас устаревшая версия `composer` обновите его или используйте `php composer.phar ...`

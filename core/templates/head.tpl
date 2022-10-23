@@ -17,3 +17,17 @@
 </script>
 <script type="text/javascript" src="/assets/js/main.js"></script>
 <link href="/assets/css/style.css" rel="stylesheet" type="text/css"/>
+{if $core->config->get('DEV_SERVER')}
+	<script class="DEV_SERVER">
+		try {
+			const ws = new WebSocket('ws://localhost:{$core->config->get('DEV_SERVER_PORT')}')
+			if(ws) {
+				ws.onmessage = function message(e) {
+					window.location.reload()
+				}
+			}
+		} catch(e) {
+			console.warn(e)
+		}
+	</script>
+{/if}

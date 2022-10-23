@@ -11,15 +11,18 @@
 	use Gettext\Loader\PoLoader;
 	use Gettext\Translator;
 	use Gettext\TranslatorFunctions;
+	use JetBrains\PhpStorm\NoReturn;
 	use model\Events\Event;
 	use model\helper\CsvTable;
 	use model\page\TmpPage;
 	use PDO;
 	use PHPMailer\PHPMailer\PHPMailer;
+	use Smarty;
 	use SmartyBC;
 	use tables\Users;
 	use Traineratwot\Cache\Cache;
 	use Traineratwot\config\Config;
+	use Traineratwot\config\ConfigOverridable;
 	use Traineratwot\PDOExtended\Dsn;
 	use Traineratwot\PDOExtended\exceptions\SqlBuildException;
 	use Traineratwot\PDOExtended\PDOE;
@@ -36,24 +39,26 @@
 		public PDOE   $db;
 		public ?Users $user = NULL;
 		/**
-		 * @var SmartyBC|null
+		 * @var Smarty|null
 		 */
-		public ?SmartyBC $smarty;
-		public bool      $isAuthenticated = FALSE;
+		public ?Smarty $smarty;
+		public bool    $isAuthenticated = FALSE;
 		/**
 		 * @var Cache
 		 */
-		public Cache $cache;
+		public Cache  $cache;
+		public Config $config;
 		/**
 		 * Переводы текущей локали
 		 * @var mixed|null
 		 */
-		public        $translation;
-		private array $_cache = [];
+		public array  $translation = [];
+		private array $_cache      = [];
 
 		public function __construct()
 		{
-			Event::emit('BeforeAppInit', $this);
+			$this->devServer();
+			Event::emit('BeforeAppInit', NULL, $this);
 			try {
 
 				$dsn = new Dsn();
@@ -76,12 +81,24 @@
 				}
 				$this->auth();
 			} catch (Exception $e) {
-				if (!Event::emit('onDataBaseError', ['core' => $this, 'error' => $e])) {
+				if (!Event::emit('onDataBaseError', NULL, $this, $e)) {
 					Err::fatal($e->getMessage(), 0, 0, $e);
 				}
 			}
-			$this->cache = new Cache();
-			Event::emit('AfterAppInit', $this);
+			$this->cache  = new Cache();
+			$this->config = new Config();
+			Event::emit('AfterAppInit', NULL, $this);
+		}
+
+		public function devServer()
+		{
+			if (Config::get('DEV_SERVER') !== TRUE) {
+				if (file_exists(WT_MODEL_PATH . 'tools/devServer.lock')) {
+					ConfigOverridable::set('DEV_SERVER', TRUE);
+				} else {
+					ConfigOverridable::set('DEV_SERVER', FALSE);
+				}
+			}
 		}
 
 		/**
@@ -138,10 +155,10 @@
 		}
 
 		/**
-		 * @param mixed $where
+		 * @param mixed|array $where
 		 * @return Users
 		 */
-		public function getUser($where = [])
+		public function getUser(mixed $where = [])
 		{
 			return new Users($this, $where);
 		}
@@ -258,12 +275,12 @@
 				$mail->Subject = $subject;
 				$mail->Body    = $body;
 				$mail->AltBody = strip_tags($body);
-				Event::emit('BeforeMailSend', $mail);
+				Event::emit('BeforeMailSend', NULL, $mail);
 				$mail->send();
-				Event::emit('AfterMailSend', $mail);
+				Event::emit('AfterMailSend', NULL, $mail);
 				return TRUE;
 			} catch (\PHPMailer\PHPMailer\Exception $e) {
-				Event::emit('onEmailSendError', ['mail' => $mail, 'error' => $e]);
+				Event::emit('onEmailSendError', NULL, $mail, $e);
 				Err::error($e->getMessage());
 				return $mail->ErrorInfo;
 			}
@@ -272,12 +289,12 @@
 		/**
 		 * @template T of \BdObject
 		 * @param class-string<T>  $class
-		 * @param array|string|int $where
+		 * @param int|array|string $where
 		 * @param boolean          $cache
 		 * @return BdObject|T
 		 * @throws Exception
 		 */
-		public function getObject(string $class, $where = [], bool $cache = TRUE)
+		public function getObject(string $class, int|array|string $where = [], bool $cache = TRUE)
 		{
 			$class = self::getClass($class);
 			if (!$cache || empty($where)) {
@@ -340,6 +357,7 @@
 			}
 			return $data;
 		}
+
 		/**
 		 * @template T of \BdObject
 		 * @param class-string<T> $class extends BdObject
@@ -448,6 +466,7 @@
 		/**
 		 * @throws Exception
 		 */
+		#[NoReturn]
 		public function errorPage($code = 404, $msg = 'Not Found')
 		{
 			header("HTTP/1.1 $code $msg");
