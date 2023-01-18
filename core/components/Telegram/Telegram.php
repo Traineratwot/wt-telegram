@@ -2,9 +2,10 @@
 
 	namespace components\Telegram;
 
-	use components\Telegram\classes\tables\Subscribe;
-	use components\Telegram\classes\tables\SubscribeUser;
-	use components\Telegram\classes\tables\Users;
+	use components\Telegram\classes\tables\TelegramHistory;
+	use components\Telegram\classes\tables\TelegramSubscribes;
+	use components\Telegram\classes\tables\TelegramUsers;
+	use components\Telegram\classes\tables\TelegramUserSubscribe;
 	use model\components\Manifest;
 
 	class Telegram extends Manifest
@@ -13,6 +14,11 @@
 		: string
 		{
 			return '';
+		}
+
+		public function afterInstall()
+		{
+			//TODO CREATE folders
 		}
 
 		public static function getComposerPackage()
@@ -27,9 +33,10 @@
 		: array
 		{
 			return [
-				Users::class,
-				Subscribe::class,
-				SubscribeUser::class,
+				TelegramHistory::class,
+				TelegramSubscribes::class,
+				TelegramUserSubscribe::class,
+				TelegramUsers::class,
 			];
 		}
 	}

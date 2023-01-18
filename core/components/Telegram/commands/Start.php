@@ -1,14 +1,16 @@
 <?php
 
-	namespace components\Telegram\model\command;
+	namespace components\Telegram\commands;
 
 
 	use components\Telegram\model\AbstractBotSlashCommand;
-	use components\Telegram\model\TelegramController;
+	use TelegramBot\Api\Exception;
+	use TelegramBot\Api\InvalidArgumentException;
+	use TelegramBot\Api\Types\Message;
 
 	class Start extends AbstractBotSlashCommand
 	{
-		public array $StartCommands
+		public $StartCommands
 			= [
 				'start',
 				'help',
@@ -16,11 +18,10 @@
 			];
 
 		/**
-		 * @var TelegramController
+		 * @throws Exception
+		 * @throws InvalidArgumentException
 		 */
-		public TelegramController $scope;
-
-		public function run($command, $args, $id, $isQuiz = FALSE, $message=null)
+		function run(int $id,Message $message)
 		{
 			foreach ($this->scope->help as $key => $value) {
 				if (empty($value)) {
@@ -29,9 +30,6 @@
 			}
 			rsort($this->scope->help);
 			$help = implode("\n", $this->scope->help);
-			if($this->scope->core->isAuthenticated){
-				$help ="Здравствуйте {$this->scope->core->user->getName()} \n\n". $help;
-			}
 			$this->scope->sendMessage($id, $help);
 		}
 	}

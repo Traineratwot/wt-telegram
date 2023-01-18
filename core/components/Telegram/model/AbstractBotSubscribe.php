@@ -1,31 +1,31 @@
 <?php
+	/**
+	 * Created by Kirill Nefediev.
+	 * User: Traineratwot
+	 * Date: 15.11.2022
+	 * Time: 13:26
+	 */
 
 	namespace components\Telegram\model;
 
-	use Exception;
 	use model\main\Core;
 	use model\main\CoreObject;
 	use PDO;
-	use tables\Subscribe;
 
 	abstract class AbstractBotSubscribe extends CoreObject
 	{
-		public string              $table      = 'subscribe';
-		public string              $primaryKey = 'id';
-		public int                 $id         = 0;
-		public mixed               $subscribe  = NULL;
-		private TelegramController $telegram;
+		public $table      = 'subscribe';
+		public $primaryKey = 'id';
+		public $id         = 0;
+		public $subscribe  = NULL;
 
-		/**
-		 * @throws Exception
-		 */
 		public function __construct(Core $core)
 		{
 			parent::__construct($core);
-			$this->telegram = new TelegramController($core);
+			$this->telegram = new TelegramController();
 			$this->id       = (int)$this->id;
 			if ($this->id) {
-				$this->subscribe = $this->core->getObject(Subscribe::class, $this->id);
+				$this->subscribe = $this->core->getObject('subscribe', $this->id);
 			}
 		}
 

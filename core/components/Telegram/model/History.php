@@ -1,49 +1,117 @@
 <?php
 
 	namespace components\Telegram\model;
-	class History
+
+
+	use components\Telegram\classes\tables\TelegramHistory;
+	use Exception;
+	use model\main\Core;
+	use Traineratwot\PDOExtended\exceptions\SqlBuildException;
+
+	class History implements HistoryManager
 	{
+		private int  $index = 0;
+		private Core $core;
+		/**
+		 * @var array<TelegramHistory>
+		 */
+		private array $history;
+		/**
+		 * @var TelegramHistory
+		 */
+		private mixed $MessageHistory;
 
 		/**
-		 * @var array
+		 * @throws SqlBuildException
+		 * @throws Exception
 		 */
-		public mixed  $chat;
-		public string $file;
-		public mixed  $id;
-
-		public function __construct($id)
+		public function __construct(Core $core, int $chat_id)
 		{
-			$this->id   = $id;
-			$this->file = WT_CACHE_PATH . 'chats/' . $this->id . '.json';
-			if (empty($this->chat) && file_exists($this->file)) {
-				$this->chat = json_decode(file_get_contents($this->file), 1);
+			$this->core           = $core;
+			$this->history        = $this->core->getCollection(TelegramHistory::class, ['chat_id' => $chat_id]);
+			$this->MessageHistory = $this->core->getObject(TelegramHistory::class);
+			$this->MessageHistory->set('chat_id', $chat_id);
+			$this->history = array_filter($this->history, function ($item) {
+				/**
+				 * @var TelegramHistory $item
+				 */
+				return $item->get('msg_type') !== 'answer';
+			});
+			usort($this->history, function ($a, $b) {
+				/**
+				 * @var TelegramHistory $a
+				 * @var TelegramHistory $b
+				 */
+				return $b->getTime() <=> $a->getTime();
+			});
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function current()
+		: TelegramHistory
+		{
+			return $this->history[$this->index];
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function next()
+		: void
+		{
+			$this->index++;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function key()
+		: int
+		{
+			return $this->index;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function valid()
+		: bool
+		{
+			return isset($this->history[$this->index]);
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function rewind()
+		: void
+		{
+			$this->index = 0;
+		}
+
+		function write()
+		{
+			return $this->MessageHistory;
+		}
+
+		public function getHistory()
+		{
+			return $this->history;
+		}
+
+		public function getLast($left = 0)
+		: TelegramHistory|null
+		{
+			return $this->history[$left] ?? NULL;
+		}
+
+		public function __destruct()
+		{
+			if ($this->MessageHistory->isNew() || $this->MessageHistory->isDirty()) {
+				$this->MessageHistory->save();
 			}
 		}
 
-		public function saveChat($data)
-		{
-			$this->chat['history'][time()] = $data;
-			$concurrentDirectory           = dirname($this->file);
-			if (!is_dir($concurrentDirectory) && !mkdir($concurrentDirectory, 0777, 1) && !is_dir($concurrentDirectory)) {
-				return FALSE;
-			}
-			file_put_contents($this->file, json_encode($this->chat, 256));
-		}
-
-		public function getLast($offset = 0)
-		{
-			if (isset($this->chat['history'])) {
-				krsort($this->chat['history']);
-				$times = array_keys($this->chat['history']);
-				if (isset($times[$offset])) {
-					return $this->chat['history'][$times[$offset]];
-				}
-			}
-			return FALSE;
-		}
-
-		public function delete()
-		{
-			unlink($this->file);
-		}
 	}

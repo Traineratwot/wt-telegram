@@ -8,7 +8,7 @@
 
 	namespace components\Telegram\model;
 
-	abstract class AbstractBotSlashCommand extends AbstractBotCommand
+	abstract class AbstractBotChatCommand extends AbstractBotCommand
 	{
-		public $type = self::TYPE_SLASH;
+		public $type = self::TYPE_COMMAND;
 	}
