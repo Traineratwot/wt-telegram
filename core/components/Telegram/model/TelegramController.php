@@ -74,8 +74,8 @@
 			$this->history        = new History($this->core, $chatId);
 			$this->MessageHistory = $this->history->write();
 			$this->help           = [];
-			$com                  = Utilities::findPath(Config::get('TELEGRAM_COMMANDS_PATH') ?: Config::get('COMPONENTS_PATH') . 'Telegram/commands/');
-			if (!$com) {
+			$com                  = Config::get('TELEGRAM_COMMANDS_PATH') ?: Config::get('COMPONENTS_PATH') . 'Telegram/commands/';
+			if (!$com || !file_exists($com)) {
 				throw Err::fatal("commands path not found");
 			}
 			$commands = scandir($com);
@@ -85,7 +85,7 @@
 			sort($commands);
 			foreach ($commands as $c) {
 				try {
-					if (is_file($com . $c) && ltrim($c, '.') == $c) {
+					if (is_file($com . $c) && ltrim($c, '.') === $c) {
 						$cls = $class = include $com . $c;
 						if (class_exists($class)) {
 							$this->CLASSES[$cls] = new $class($this);
