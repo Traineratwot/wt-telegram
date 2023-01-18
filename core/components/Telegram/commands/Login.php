@@ -16,7 +16,7 @@
 				'login',
 			];
 
-		public $description = "{email} {password} регистрирует/авторизует пользователя";
+		public $description = "Авторизация";
 
 		/**
 		 * @throws Exception
