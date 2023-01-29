@@ -8,20 +8,24 @@
 
 	namespace components\Telegram\model;
 
+	use components\Telegram\classes\tables\TelegramUsers;
 	use TelegramBot\Api\Types\message;
 
-	abstract class AbstractBotCallback
+	abstract class AbstractBotCallback extends AbstractBotCommand
 	{
 
-		public $fn = 'test';
-		/**
-		 * @var TelegramController
-		 */
-		public $scope = "";
-
-		public function __construct(TelegramController $scope)
+		public function process(int $id, Message $message, $args = [])
 		{
-			$this->scope = $scope;
+			/** @var TelegramUsers $user */
+			$user = $this->core->getObject(TelegramUsers::class, ['chat_id' => $id]);
+			if ($user && !$user->isNew()) {
+				$this->user = $user->getUser();
+				$this->core->auth($this->user);
+			}
+			$this->message = $message;
+			$this->args = $args;
+			$this->run($id, $message,$args);
+
 		}
 
 		public function getDescription()
@@ -29,10 +33,10 @@
 			return NULL;
 		}
 
-		abstract function run(Message $message, $args, $id);
+		abstract public function run(int $id, Message $message);
 
 		public function getStartCommands()
 		{
-			return [$this->fn];
+			return $this->StartCommands;
 		}
 	}
